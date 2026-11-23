@@ -1,42 +1,25 @@
 package audit
 
 import (
-	"fmt"
 	"os/exec"
-	"strings"
 )
 
 type Finding struct {
+	exitCode    int
 	severity    int // 5-1: 5 is least severe, 1 is critical
 	description string
 }
 
-func Run() {
-	find1 := nixCheck()
-	fmt.Println(find1.severity)
-	fmt.Println(find1.description)
-}
+func Run() (findings []Finding) {
+	findings = append(findings, nixCheck())
 
-func parse(out string) (parsed string) {
-	sliced := strings.Split(out, "\n")
-	for _, line := range sliced {
-		if strings.HasPrefix(line, "checking") {
-			continue
-		}
-		parsed += line
+	vulnixPath, err := exec.LookPath("vulnix")
+	if err != nil {
+		findings = append(findings, Finding{description: "Vulnix is not in path. Should be packaged with the flake." +
+			" If you have built the project from source, please install Vulnix!"})
+	} else {
+		findings = append(findings, vulnixCheck(vulnixPath))
 	}
 
 	return
-}
-
-func nixCheck() Finding {
-	// first: check store
-	out, err := exec.Command("nix", "store", "verify", "--all").CombinedOutput()
-	if err != nil {
-		strOut := string(out)
-		parsedOut := parse(strOut)
-		return Finding{severity: 3, description: string(parsedOut)}
-	}
-
-	return Finding{description: string(out)}
 }
