@@ -17,3 +17,4 @@ Order of priority:
 > [WARNING]
 > Until this warning is removed, ravenix is not trustworthy enough to consider yourself safe.
 
+THIS IS A NO AI PROJECT. If a contribution is suspected of AI usage, it WILL be rejected.
